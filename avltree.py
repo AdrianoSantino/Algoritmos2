@@ -175,7 +175,7 @@ def rotateLeft(AVL, node):
         if node is AVL.root:
             AVL.root = nodeR
         else:
-            nodeP.rightnode = nodeR
+            nodeP.leftnode = nodeR
     return AVL.root
 
 
@@ -206,7 +206,7 @@ def rotateRight(AVL, node):
         if node is AVL.root:
             AVL.root = nodeL
         else:
-            nodeP.leftnode = nodeL
+            nodeP.rightnode = nodeL
     return AVL.root
 
 
@@ -253,7 +253,7 @@ def traverseBreadth(node, lst):
 
 
 def rebalance(AVL):
-    def rebalanceR(node, last=None):
+    def rebalanceR(node):
         ll = list()
         traverseBreadth(node, ll)
         ll.reverse()
@@ -276,8 +276,8 @@ def rebalance(AVL):
                 raise TypeError("Tree passed does not correspond to an AVL construction.")
             i += 1
             node = ll[i]
-            print(node.key)
-            AVL.root.display()
+            # print(node.key)
+            # AVL.root.display()
         return AVL
 
     if AVL.root is None:
@@ -286,7 +286,7 @@ def rebalance(AVL):
 
 
 def create_tree(size):
-    random.seed(1)
+    random.seed(44)
     A = AVLTree()
     for i in range(size):
         val = random.choice(string.ascii_letters.upper())
@@ -296,12 +296,9 @@ def create_tree(size):
     return A
 
 
-A = create_tree(7)
+A = create_tree(10)
 A = calculateBalance(A)
 A.root.display()
-delete(A, 16)
-delete(A, -16)
+rotateLeft(A, access(A, -13))
 A = calculateBalance(A)
-A.root.display()
-A = rebalance(A)
 A.root.display()
