@@ -148,68 +148,6 @@ def maximum(node):
     return maximum(node.rightnode)
 
 
-def rotateLeft(AVL, node):
-    nodeR = node.rightnode
-
-    if nodeR.leftnode is None and nodeR.rightnode is not None:
-        if node is AVL.root:
-            node.rightnode = None
-            AVL.root = nodeR
-        else:
-            node.parent.rightnode = nodeR
-        nodeR.leftnode = node
-
-    elif nodeR.leftnode is not None and nodeR.rightnode is None:
-        node.rightnode = None
-        nodeR.leftnode = node
-        if node is AVL.root:
-            AVL.root = nodeR
-        else:
-            node.parent.rightnode = nodeR
-
-    else:
-        nodeRL = nodeR.leftnode
-        nodeP = node.parent
-        node.rightnode = nodeRL
-        nodeR.leftnode = node
-        if node is AVL.root:
-            AVL.root = nodeR
-        else:
-            nodeP.leftnode = nodeR
-    return AVL.root
-
-
-def rotateRight(AVL, node):
-    nodeL = node.leftnode
-
-    if nodeL.rightnode is None and nodeL.leftnode is not None:
-        if node is AVL.root:
-            node.leftnode = None
-            AVL.root = nodeL
-        else:
-            node.parent.leftnode = nodeL
-        nodeL.rightnode = node
-
-    elif nodeL.rightnode is not None and nodeL.leftnode is None:
-        node.leftnode = None
-        nodeL.rightnode = node
-        if node is AVL.root:
-            AVL.root = nodeL
-        else:
-            node.parent.leftnode = nodeL
-
-    else:
-        nodeLR = nodeL.rightnode
-        nodeP = node.parent
-        node.leftnode = nodeLR
-        nodeL.rightnode = node
-        if node is AVL.root:
-            AVL.root = nodeL
-        else:
-            nodeP.rightnode = nodeL
-    return AVL.root
-
-
 def traverseIn(AVL):
     def traverseInR(node, lst):
         if node is None:
@@ -243,46 +181,100 @@ def calculateBalance(AVL):
     return AVL
 
 
-def traverseBreadth(node, lst):
-    lst.append(node)
-    if node.leftnode is not None:
-        traverseBreadth(node.leftnode, lst)
-    if node.rightnode is not None:
-        traverseBreadth(node.rightnode, lst)
-    return
+def traverseBreadth(root):
+    def traverseBreadthR(Q, current):
+        L = []
+        Q.append(current)
+        while len(Q) > 0:
+            current = Q.pop(0)
+            L.append(current)
+            if current.leftnode:
+                Q.append(current.leftnode)
+            if current.rightnode:
+                Q.append(current.rightnode)
+        return L
+
+    if root is not None:
+        return traverseBreadthR([], root)
+
+
+def rotateLeft(AVL, p):
+    q = p.rightnode
+    if q.bf == -1 or q.bf == 0:
+        p.rightnode = q.leftnode
+        if q.leftnode:
+            q.leftnode.parent = p
+        q.leftnode = p
+        p.parent = q
+        q.parent = None
+        calculateBalance(AVL)
+        return q
+
+    elif q.bf == 1:
+        p.rightnode = rotateRight(AVL, q)
+        calculateBalance(AVL)
+        return rotateLeft(AVL, p)
+
+
+def rotateRight(AVL, p):
+    q = p.leftnode
+
+    if q.bf == 0 or q.bf == 1:
+        p.leftnode = q.rightnode
+        if q.rightnode:
+            q.rightnode.parent = p
+        q.rightnode = p
+        p.parent = q
+        q.parent = None
+        calculateBalance(AVL)
+        return q
+
+    elif q.bf == -1:
+        p.leftnode = rotateLeft(AVL, q)
+        calculateBalance(AVL)
+        return rotateRight(AVL, p)
+
+
+def find_lowest_unbalanced(AVL):
+    nodes = traverseBreadth(AVL.root)
+    nodes.reverse()
+    # [print(node.key, end=" ") for node in ll]
+    for node in nodes:
+        if abs(node.bf) == 2:
+            return node
+    return None
 
 
 def rebalance(AVL):
-    def rebalanceR(node):
-        ll = list()
-        traverseBreadth(node, ll)
-        ll.reverse()
-        root = node
+    def rebalanceR(node, root):
+        if node is None:
+            return root
 
-        node = ll[0]
-        i = 0
-        while node is not root:
-            if abs(node.bf) == 2:
-                if node.bf == -2:
-                    AVL.root = rotateLeft(AVL, node)
-                elif node.bf == 2:
-                    AVL.root = rotateRight(AVL, node)
-                if node.parent == root:
-                    break
-                calculateBalance(AVL)
-            elif abs(node.bf) <= 2:
-                pass
-            else:
-                raise TypeError("Tree passed does not correspond to an AVL construction.")
-            i += 1
-            node = ll[i]
-            # print(node.key)
-            # AVL.root.display()
-        return AVL
+        left = None
+        nodeP = node.parent
+        if nodeP:
+            if node.parent.leftnode is node:
+                left = True
+            elif node.parent.rightnode is node:
+                left = False
 
-    if AVL.root is None:
-        return None
-    return rebalanceR(AVL.root)
+        r = None
+        if node.bf == 2:
+            r = rotateRight(AVL, node)
+        elif node.bf == -2:
+            r = rotateLeft(AVL, node)
+
+        if left is True:
+            nodeP.leftnode = r
+        elif left is False:
+            nodeP.rightnode = r
+        calculateBalance(AVL)
+        return rebalanceR(node.parent, root)
+
+    start = find_lowest_unbalanced(AVL)
+    if start:
+        AVL.root = rebalanceR(start, AVL.root)
+    return AVL
 
 
 def create_tree(size):
@@ -292,13 +284,55 @@ def create_tree(size):
         val = random.choice(string.ascii_letters.upper())
         key = random.randint(-20, 20)
         insert(A, key, val)
-    A.root.display()
     return A
 
 
-A = create_tree(10)
-A = calculateBalance(A)
-A.root.display()
-rotateLeft(A, access(A, -13))
-A = calculateBalance(A)
-A.root.display()
+AVL = AVLTree()
+AVL.root = newNode(30)
+for key in [20, 50, 40, 35]:
+    insert(AVL, key)
+AVL = calculateBalance(AVL)
+AVL.root.display()
+AVL = rebalance(AVL)
+AVL.root.display()
+
+
+def tests():
+    print("====================================================\nSIMPLE ROTATION CASE")
+    AVL = AVLTree
+    AVL.root = newNode(10)
+    insert(AVL, 50)
+    insert(AVL, 30)
+    AVL = calculateBalance(AVL)
+    AVL.root.display()
+    AVL.root = rotateLeft(AVL, AVL.root)
+    # print(AVL.root.key)
+    AVL = calculateBalance(AVL)
+    AVL.root.display()
+
+    print("====================================================\nDOUBLE ROTATION CASE")
+    AVL = AVLTree
+    AVL.root = newNode(10)
+    insert(AVL, 20)
+    insert(AVL, 30)
+    AVL = calculateBalance(AVL)
+    AVL.root.display()
+    AVL.root = rotateLeft(AVL, AVL.root)
+    #     print(AVL.root.key)
+    AVL = calculateBalance(AVL)
+    AVL.root.display()
+
+    print("====================================================\nDOUBLE ROTATION CASE v2")
+    AVL = AVLTree
+    AVL.root = newNode(30)
+    insert(AVL, 20)
+    insert(AVL, 60)
+    insert(AVL, 50)
+    insert(AVL, 70)
+    insert(AVL, 40)
+    AVL = calculateBalance(AVL)
+    AVL.root.display()
+    AVL.root = rotateLeft(AVL, AVL.root)
+    #     print(AVL.root.key)
+    AVL = calculateBalance(AVL)
+    AVL.root.display()
