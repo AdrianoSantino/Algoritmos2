@@ -109,6 +109,7 @@ def insert(AVL, key, val=None):
             node.leftnode = insertR(node.leftnode, new)
         else:
             node.rightnode = insertR(node.rightnode, new)
+        rebalance(AVL)
         return node
 
     new = newNode(key, val)
@@ -209,7 +210,7 @@ def traverseBreadth(root):
         return traverseBreadthR([], root)
 
 
-# Performs a left rotation on the given node, returns the new AVL root node - O(1): only makes reassignments
+# Performs a left rotation on the given node, returns the new AVL root node - O(n^2): uses calculateBalance
 def rotateLeft(AVL, p: AVLNode) -> AVLNode:
     if abs(p.bf) > 2:
         raise Exception("Can not balance node: check bf.")
@@ -229,7 +230,7 @@ def rotateLeft(AVL, p: AVLNode) -> AVLNode:
     return q
 
 
-# Performs a right rotation on the given node, returns the new AVL root node - O(1): only makes reassignments
+# Performs a right rotation on the given node, returns the new AVL root node - O(n^2): uses calculateBalance
 def rotateRight(AVL, p: AVLNode) -> AVLNode:
     if abs(p.bf) > 2:
         raise Exception("Can not balance node: check bf.")
@@ -261,7 +262,8 @@ def find_lowest_unbalanced(AVL) -> AVLNode | None:
     return None
 
 
-# Rebalances an AVLTree that got unbalanced after an insert/delete operation (exists node: bf=-2,2)
+# Rebalances a partially-constructed AVLTree that got unbalanced after an insert/delete operation (exists node: bf=-2,2)
+# O(n^2): as it uses calculateBalance inside its rotation functions
 def rebalance(AVL):
     def rebalanceR(node, root):
         if node is None:  # stops after balancing the root on the previous iteration
@@ -301,6 +303,10 @@ def create_tree(size):
         key = random.randint(-20, 20)
         insert(A, key, val)
     return A
+
+
+A = create_tree(10)
+A.root.display()
 
 
 def tests():
@@ -343,5 +349,4 @@ def tests():
     AVL = calculateBalance(AVL)
     AVL.root.display()
 
-
-tests()
+# tests()
