@@ -1,3 +1,6 @@
+import random
+
+
 class AVLTree:
     root = None
 
@@ -109,7 +112,7 @@ def access(AVL, key) -> AVLNode:
 
 
 def insert(AVL, key, val=None):
-    """Inserts an AVLNode using the divide and conquer method, returns the key"""
+    """Inserts an AVLNode using the divide and conquer method, returns the current root"""
 
     def insertR(new, node):
         if node is None:
@@ -122,7 +125,9 @@ def insert(AVL, key, val=None):
         return node
 
     new = newNode(key, val)
-    return insertR(new, AVL.root)
+    AVL.root = insertR(new, AVL.root)
+    rebalance(AVL)
+    return AVL.root
 
 
 def delete(AVL, key):
@@ -222,6 +227,8 @@ def rotateLeft(AVL, node) -> AVLNode:
     nodeR.leftnode = node
     node.parent = node.rightnode
     nodeR.parent = None
+    calculateBalance(AVL)
+    refresh_parents(AVL)
     return nodeR
 
 
@@ -234,6 +241,7 @@ def rotateRight(AVL, node) -> AVLNode:
     node.parent = node.leftnode
     nodeL.parent = None
     calculateBalance(AVL)
+    refresh_parents(AVL)
     return nodeL
 
 
@@ -249,14 +257,12 @@ def rotateCases(AVL, node) -> AVLNode | None:
         nodeR = node.rightnode
         if nodeR.bf in [0, 1]:
             node.rightnode = rotateRight(AVL, nodeR)
-            nodeR.parent = node
         return rotateLeft(AVL, node)
 
     elif node.bf == 2:
         nodeL = node.leftnode
         if nodeL.bf in [-1, 0]:
             node.leftnode = rotateLeft(AVL, nodeL)
-            nodeL.parent = node
         return rotateRight(AVL, node)
 
     else:
@@ -271,30 +277,62 @@ def calculateBalance(AVL):
     return AVL
 
 
+def find_low_unb(AVL) -> AVLNode | None:
+    trv_bre = traverseBreadth(AVL)
+    trv_bre.reverse()
+    for node in trv_bre:
+        if abs(node.bf) > 1:
+            return node
+    return None
+
+
 def rebalance(AVL):
     """Given a nearby-unbalanced AVL tree construction, rebalances and returns the AVL"""
 
-    def rebalanceR(node):
-        if node is None:
-            return None
-
-        node.leftnode = rotateCases(AVL, node.leftnode)
-        node.rightnode = rotateCases(AVL, node.rightnode)
-        return rotateCases(AVL, node)
-
-    AVL.root = rebalanceR(AVL.root)
     calculateBalance(AVL)
+    refresh_parents(AVL)
+
+    while True:
+        low = find_low_unb(AVL)
+        if low is None:
+            break
+        if low is AVL.root:
+            AVL.root = rotateCases(AVL, low)
+            break
+
+        lowP = low.parent
+        if lowP.leftnode is low:
+            lowP.leftnode = rotateCases(AVL, low)
+        else:  # lowP.rightnode is low
+            lowP.rightnode = rotateCases(AVL, low)
+
+        calculateBalance(AVL)
+        refresh_parents(AVL)
+
     return AVL
+
+
+def refresh_parents(AVL) -> None:
+    """Assign each node its current parent"""
+
+    def refresh_parentsR(node):
+        if node is None:
+            return
+        if node.leftnode is not None:
+            node.leftnode.parent = node
+        if node.rightnode is not None:
+            node.rightnode.parent = node
+        refresh_parentsR(node.leftnode)
+        refresh_parentsR(node.rightnode)
+        return
+
+    return refresh_parentsR(AVL.root)
 
 
 def test():
     A = AVLTree()
-    A.root = newNode(10)
-    for key in [-15, 1, -20]:
-        A.root = insert(A, key)
-    calculateBalance(A)
-    A.root.display()
-    A = rebalance(A)
+    for key in range(20):
+        A.root = insert(A, random.randint(0, 50))
     A.root.display()
 
 
