@@ -275,7 +275,7 @@ def rebalance(AVL):
     return AVL
 
 
-def test()
+def test():
     A = AVLTree()
     A.root = newNode(10)
     for key in [-15, 1, -20]:
