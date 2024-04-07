@@ -1,7 +1,3 @@
-import random
-import string
-
-
 class AVLTree:
     root = None
 
@@ -14,8 +10,8 @@ class AVLNode:
     value = None
     bf = 0  # balance factor
 
-    # Functions that print an AVLTree graphically on console by showing each node's (key, bf)
     def display(self):
+        """Functions that prints the structure an AVLTree on console by showing each node's (key, bf)"""
         print("\n\nAVL TREE (key, bf):\n")
         lines, *_ = self._display_aux()
         for line in lines:
@@ -73,8 +69,8 @@ class AVLNode:
         return lines, n + m + u, max(p, q) + 2, n + u // 2
 
 
-# Creates an AVLNode by specifying key and op. val
 def newNode(key, val=None):
+    """Creates an AVLNode by specifying key and op. value"""
     if val is None:
         val = key
     new = AVLNode()
@@ -83,8 +79,9 @@ def newNode(key, val=None):
     return new
 
 
-# Accesses an AVLNode by its key and returns it - O(log(n))
 def access(AVL, key) -> AVLNode:
+    """Accesses an AVLNode by key and returns it - O(log(n))"""
+
     def accessR(node, key):
         if node is None:
             return None
@@ -99,26 +96,26 @@ def access(AVL, key) -> AVLNode:
     return accessR(AVL.root, key)
 
 
-# Inserts an AVLNode using the divide and conquer method, returns the key - O(log(n))
 def insert(AVL, key, val=None):
-    def insertR(node, new):
+    """Inserts an AVLNode using the divide and conquer method, returns the key"""
+
+    def insertR(new, node):
         if node is None:
             return new
         new.parent = node
         if new.key < node.key:
-            node.leftnode = insertR(node.leftnode, new)
+            node.leftnode = insertR(new, node.leftnode)
         else:
-            node.rightnode = insertR(node.rightnode, new)
-        rebalance(AVL)
+            node.rightnode = insertR(new, node.rightnode)
         return node
 
     new = newNode(key, val)
-    AVL.root = insertR(AVL.root, new)
-    return key
+    return insertR(new, AVL.root)
 
 
-# Deletes an AVLNode by key, returns the key - O(log(n)) by the fact that an AVLTree is required as an input
 def delete(AVL, key):
+    """Deletes an AVLNode by key, returns the key"""
+
     def deleteR(node, key):
         if node is None:
             return None
@@ -143,22 +140,23 @@ def delete(AVL, key):
     return key
 
 
-# Given a Tree node, finds and returns its minimum successor
 def minimum(node) -> AVLNode:
+    """Given a Tree node, returns its minimum successor"""
     if node.leftnode is None and node.rightnode is None:
         return node
     return minimum(node.leftnode)
 
 
-# Given a Tree node, finds and returns its maximum successor
 def maximum(node) -> AVLNode:
+    """Given a Tree node, returns its maximum successor"""
     if node.leftnode is None and node.rightnode is None:
         return node
     return maximum(node.rightnode)
 
 
-# Returns a list of nodes after traverseIn order - 0(n): all nodes need to be reached
 def traverseIn(AVL) -> list:
+    """Returns a list of nodes after traverseIn order - 0(n): all nodes need to be reached"""
+
     def traverseInR(node, lst):
         if node is None:
             return lst
@@ -168,6 +166,26 @@ def traverseIn(AVL) -> list:
         return lst
 
     return traverseInR(AVL.root, [AVL.root])
+
+
+def traverseBreadth(AVL):
+    """Returns a list of nodes after traverseBreadth - 0(n): all nodes need to be reached"""
+
+    def traverseBreadthR(Q, current):
+        L = []
+        Q.append(current)
+        while len(Q) > 0:
+            current = Q.pop(0)
+            L.append(current)
+            if current.leftnode:
+                Q.append(current.leftnode)
+            if current.rightnode:
+                Q.append(current.rightnode)
+        return L
+
+    if AVL.root is not None:
+        return traverseBreadthR([], AVL.root)
+    return None
 
 
 def height(node) -> int:
@@ -184,169 +202,88 @@ def balanceFactor(node) -> int:
     return leftH - rightH
 
 
-# Calculates the balance factor of all the AVLTree nodes, returns the new updated AVLTree -> O(n^2)
-def calculateBalance(AVL) -> AVLTree:
-    lst = traverseIn(AVL)
-    for node in lst:
+def rotateLeft(AVL, node) -> AVLNode:
+    """Returns the new root"""
+
+    nodeR = node.rightnode
+    node.rightnode = nodeR.leftnode
+    nodeR.leftnode = node
+    node.parent = node.rightnode
+    nodeR.parent = None
+    return nodeR
+
+
+def rotateRight(AVL, node) -> AVLNode:
+    """Returns the new root"""
+
+    nodeL = node.leftnode
+    node.leftnode = node.leftnode.rightnode
+    nodeL.rightnode = node
+    node.parent = node.leftnode
+    nodeL.parent = None
+    calculateBalance(AVL)
+    return nodeL
+
+
+def rotateCases(AVL, node) -> AVLNode | None:
+    """Given an unbalanced node (defined as root), performs the corresponding rotation, returns the resulting root"""
+    if node is None:
+        return None
+
+    if node.bf in [-1, 0, 1]:
+        return node
+
+    elif node.bf == -2:
+        nodeR = node.rightnode
+        if nodeR.bf in [0, 1]:
+            node.rightnode = rotateRight(AVL, nodeR)
+            nodeR.parent = node
+        return rotateLeft(AVL, node)
+
+    elif node.bf == 2:
+        nodeL = node.leftnode
+        if nodeL.bf in [-1, 0]:
+            node.leftnode = rotateLeft(AVL, nodeL)
+            nodeL.parent = node
+        return rotateRight(AVL, node)
+
+    else:
+        raise Exception("Not an AVL construct")
+
+
+def calculateBalance(AVL):
+    """Calculates balance factors by reference, no need to reassign. O(n^2)"""
+    trv_in = traverseIn(AVL)
+    for node in trv_in:
         node.bf = balanceFactor(node)
     return AVL
 
 
-# Returns a list of nodes after traverseBreadth - 0(n): all nodes need to be reached
-def traverseBreadth(root):
-    def traverseBreadthR(Q, current):
-        L = []
-        Q.append(current)
-        while len(Q) > 0:
-            current = Q.pop(0)
-            L.append(current)
-            if current.leftnode:
-                Q.append(current.leftnode)
-            if current.rightnode:
-                Q.append(current.rightnode)
-        return L
-
-    if root is not None:
-        return traverseBreadthR([], root)
-
-
-# Performs a left rotation on the given node, returns the new AVL root node - O(n^2): uses calculateBalance
-def rotateLeft(AVL, p: AVLNode) -> AVLNode:
-    if abs(p.bf) > 2:
-        raise Exception("Can not balance node: check bf.")
-    q = p.rightnode
-    if q.bf == 1:  # double rotation case
-        p.rightnode = rotateRight(AVL, q)
-        return rotateLeft(AVL, p)
-
-    # q.bf == -1 or q.bf == 0 - simple rotation cases
-    p.rightnode = q.leftnode
-    if q.leftnode:
-        q.leftnode.parent = p
-    q.leftnode = p
-    p.parent = q
-    q.parent = None
-    calculateBalance(AVL)
-    return q
-
-
-# Performs a right rotation on the given node, returns the new AVL root node - O(n^2): uses calculateBalance
-def rotateRight(AVL, p: AVLNode) -> AVLNode:
-    if abs(p.bf) > 2:
-        raise Exception("Can not balance node: check bf.")
-    q = p.leftnode
-
-    if q.bf == -1:  # double rotation case
-        p.leftnode = rotateLeft(AVL, q)
-        return rotateRight(AVL, p)
-
-    # q.bf == 0 or q.bf == 1 - simple rotation cases
-    p.leftnode = q.rightnode
-    if q.rightnode:
-        q.rightnode.parent = p
-    q.rightnode = p
-    p.parent = q
-    q.parent = None
-    calculateBalance(AVL)
-    return q
-
-
-# Performs a traverseBreath and returns the highest (biggest height) unbalanced node - O(n)
-def find_lowest_unbalanced(AVL) -> AVLNode | None:
-    nodes = traverseBreadth(AVL.root)
-    nodes.reverse()
-    # [print(node.key, end=" ") for node in ll]
-    for node in nodes:
-        if abs(node.bf) == 2:
-            return node
-    return None
-
-
-# Rebalances a partially-constructed AVLTree that got unbalanced after an insert/delete operation (exists node: bf=-2,2)
-# O(n^2): as it uses calculateBalance inside its rotation functions
 def rebalance(AVL):
-    def rebalanceR(node, root):
-        if node is None:  # stops after balancing the root on the previous iteration
-            return root
+    """Given a nearby-unbalanced AVL tree construction, rebalances and returns the AVL"""
 
-        if abs(node.bf) <= 1:
-            return rebalanceR(node.parent, root)
+    def rebalanceR(node):
+        if node is None:
+            return None
 
-        nodeP = node.parent  # saves an auxiliar reference of the parent node
-        r = None
-        # It is importante to say that both rotate functions must receive an unbalanced node
-        if node.bf == 2:
-            r = rotateRight(AVL, node)
-        elif node.bf == -2:
-            r = rotateLeft(AVL, node)
+        node.leftnode = rotateCases(AVL, node.leftnode)
+        node.rightnode = rotateCases(AVL, node.rightnode)
+        return rotateCases(AVL, node)
 
-        # uses the parents node reference when necessary
-        if nodeP is not None:
-            if node.parent.leftnode is node:
-                nodeP.leftnode = r
-            elif node.parent.rightnode is node:
-                nodeP.rightnode = r
-
-        return rebalanceR(node.parent, root)  # goes up
-
-    start = find_lowest_unbalanced(AVL)
-    if start:
-        AVL.root = rebalanceR(start, AVL.root)
+    AVL.root = rebalanceR(AVL.root)
+    calculateBalance(AVL)
     return AVL
 
 
-def create_tree(size):
-    random.seed(10)
+def test()
     A = AVLTree()
-    for i in range(size):
-        val = random.choice(string.ascii_letters.upper())
-        key = random.randint(-20, 20)
-        insert(A, key, val)
-    return A
+    A.root = newNode(10)
+    for key in [-15, 1, -20]:
+        A.root = insert(A, key)
+    calculateBalance(A)
+    A.root.display()
+    A = rebalance(A)
+    A.root.display()
 
 
-A = create_tree(10)
-A.root.display()
-
-
-def tests():
-    print("====================================================\nSIMPLE ROTATION CASE")
-    AVL = AVLTree
-    AVL.root = newNode(10)
-    insert(AVL, 50)
-    insert(AVL, 30)
-    AVL = calculateBalance(AVL)
-    AVL.root.display()
-    AVL.root = rotateLeft(AVL, AVL.root)
-    # print(AVL.root.key)
-    AVL = calculateBalance(AVL)
-    AVL.root.display()
-
-    print("====================================================\nDOUBLE ROTATION CASE")
-    AVL = AVLTree
-    AVL.root = newNode(10)
-    insert(AVL, 20)
-    insert(AVL, 30)
-    AVL = calculateBalance(AVL)
-    AVL.root.display()
-    AVL.root = rotateLeft(AVL, AVL.root)
-    #     print(AVL.root.key)
-    AVL = calculateBalance(AVL)
-    AVL.root.display()
-
-    print("====================================================\nDOUBLE ROTATION CASE v2")
-    AVL = AVLTree
-    AVL.root = newNode(30)
-    insert(AVL, 20)
-    insert(AVL, 60)
-    insert(AVL, 50)
-    insert(AVL, 70)
-    insert(AVL, 40)
-    AVL = calculateBalance(AVL)
-    AVL.root.display()
-    AVL.root = rotateLeft(AVL, AVL.root)
-    #     print(AVL.root.key)
-    AVL = calculateBalance(AVL)
-    AVL.root.display()
-
-# tests()
+test()
