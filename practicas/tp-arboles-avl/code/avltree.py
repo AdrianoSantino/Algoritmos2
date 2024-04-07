@@ -131,7 +131,7 @@ def insert(AVL, key, val=None):
 
 
 def delete(AVL, key):
-    """Deletes an AVLNode by key, returns the key"""
+    """Deletes an AVLNode by key, returns the current root"""
 
     def deleteR(node, key):
         if node is None:
@@ -154,7 +154,8 @@ def delete(AVL, key):
         return node
 
     AVL.root = deleteR(AVL.root, key)
-    return key
+    rebalance(AVL)
+    return AVL.root
 
 
 def minimum(node) -> AVLNode:
@@ -227,8 +228,8 @@ def rotateLeft(AVL, node) -> AVLNode:
     nodeR.leftnode = node
     node.parent = node.rightnode
     nodeR.parent = None
-    calculateBalance(AVL)
     refresh_parents(AVL)
+    calculateBalance(AVL)
     return nodeR
 
 
@@ -240,8 +241,8 @@ def rotateRight(AVL, node) -> AVLNode:
     nodeL.rightnode = node
     node.parent = node.leftnode
     nodeL.parent = None
-    calculateBalance(AVL)
     refresh_parents(AVL)
+    calculateBalance(AVL)
     return nodeL
 
 
@@ -289,8 +290,8 @@ def find_low_unb(AVL) -> AVLNode | None:
 def rebalance(AVL):
     """Given a nearby-unbalanced AVL tree construction, rebalances and returns the AVL"""
 
-    calculateBalance(AVL)
     refresh_parents(AVL)
+    calculateBalance(AVL)
 
     while True:
         low = find_low_unb(AVL)
@@ -298,6 +299,8 @@ def rebalance(AVL):
             break
         if low is AVL.root:
             AVL.root = rotateCases(AVL, low)
+            refresh_parents(AVL)
+            calculateBalance(AVL)
             break
 
         lowP = low.parent
@@ -306,8 +309,8 @@ def rebalance(AVL):
         else:  # lowP.rightnode is low
             lowP.rightnode = rotateCases(AVL, low)
 
-        calculateBalance(AVL)
         refresh_parents(AVL)
+        calculateBalance(AVL)
 
     return AVL
 
@@ -330,9 +333,12 @@ def refresh_parents(AVL) -> None:
 
 
 def test():
+    random.seed(9)
     A = AVLTree()
-    for key in range(20):
+    for key in range(7):
         A.root = insert(A, random.randint(0, 50))
+    A.root.display()
+    A.root = delete(A, A.root.rightnode.leftnode.key)  # after this deletion, AVL becomes highly unbalanced
     A.root.display()
 
 
