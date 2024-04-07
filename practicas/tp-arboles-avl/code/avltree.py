@@ -12,7 +12,7 @@ class AVLNode:
 
     def display(self):
         """Functions that prints the structure an AVLTree on console by showing each node's (key, bf)"""
-        print("\n\nAVL TREE (key, bf):\n")
+        print("\n\nAVL TREE (key, bf, parent.key):\n")
         lines, *_ = self._display_aux()
         for line in lines:
             print(line)
@@ -22,7 +22,10 @@ class AVLNode:
         """Returns list of strings, width, height, and horizontal coordinate of the root."""
         # No child.
         if self.rightnode is None and self.leftnode is None:
-            line = f"({self.key}, {self.bf})"
+            if self.parent is not None:
+                line = f"({self.key}, {self.bf}, {self.parent.key})"
+            else:
+                line = f"({self.key}, {self.bf}, {None})"
             width = len(line)
             height = 1
             middle = width // 2
@@ -31,7 +34,10 @@ class AVLNode:
         # Only leftnode child.
         if self.rightnode is None:
             lines, n, p, x = self.leftnode._display_aux()
-            s = f"({self.key}, {self.bf})"
+            if self.parent is not None:
+                s = f"({self.key}, {self.bf}, {self.parent.key})"
+            else:
+                s = f"({self.key}, {self.bf}, {None})"
             u = len(s)
             first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
             second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
@@ -42,7 +48,10 @@ class AVLNode:
         # Only rightnode child.
         if self.leftnode is None:
             lines, n, p, x = self.rightnode._display_aux()
-            s = f"({self.key}, {self.bf})"
+            if self.parent is not None:
+                s = f"({self.key}, {self.bf}, {self.parent.key})"
+            else:
+                s = f"({self.key}, {self.bf}, {None})"
             u = len(s)
             first_line = s + x * '_' + (n - x) * ' '
             second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
@@ -53,7 +62,10 @@ class AVLNode:
         # Two children.
         left, n, p, x = self.leftnode._display_aux()
         right, m, q, y = self.rightnode._display_aux()
-        s = f"({self.key}, {self.bf})"
+        if self.parent is not None:
+            s = f"({self.key}, {self.bf}, {self.parent.key})"
+        else:
+            s = f"({self.key}, {self.bf}, {None})"
         u = len(s)
         first_line = (x + 1) * ' ' + (n - x -
                                       1) * '_' + s + y * '_' + (m - y) * ' '
