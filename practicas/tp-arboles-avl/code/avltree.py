@@ -248,6 +248,7 @@ def rotateRight(AVL, node) -> AVLNode:
 
 def rotateCases(AVL, node) -> AVLNode | None:
     """Given an unbalanced node (defined as root), performs the corresponding rotation, returns the resulting root"""
+
     if node is None:
         return None
 
@@ -272,6 +273,7 @@ def rotateCases(AVL, node) -> AVLNode | None:
 
 def calculateBalance(AVL):
     """Calculates balance factors by reference, no need to reassign. O(n^2)"""
+
     trv_in = traverseIn(AVL)
     for node in trv_in:
         node.bf = balanceFactor(node)
@@ -332,6 +334,20 @@ def refresh_parents(AVL) -> None:
     return refresh_parentsR(AVL.root)
 
 
+def heightAVL(AVL):
+    """Calculates the height of an AVLTree on O(logN), uses bf as guides"""
+    if AVL is None:
+        return None
+
+    def heightAVLR(node):
+        if node is None:
+            return 0
+        longest = node.rightnode if node.bf < 0 else node.leftnode
+        return heightAVLR(longest) + 1
+
+    return heightAVLR(AVL.root) - 1 if AVL.root else 0
+
+
 def test():
     random.seed(9)
     A = AVLTree()
@@ -340,6 +356,7 @@ def test():
     A.root.display()
     A.root = delete(A, A.root.rightnode.leftnode.key)  # after this deletion, AVL becomes highly unbalanced
     A.root.display()
+    print(heightAVL(A))
 
 
 test()
