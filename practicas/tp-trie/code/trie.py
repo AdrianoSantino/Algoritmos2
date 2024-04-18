@@ -46,15 +46,43 @@ def insert(T, element):
     return
 
 
-def search(T, element):
-    def searchR(node, word, wordSize, index):
+def searchNode(T, element):
+    def searchNodeR(node, word, wordSize, index):
+
         if index == wordSize:
-            return True
+            return True, node
 
         letter = word[index]
         letterFound, new = isLetterOnChildren(node, letter)
-        return False if not letterFound else searchR(new, word, wordSize, index + 1)
+        if not letterFound:
+            return False, node
+        else:
+            return searchNodeR(new, word, wordSize, index + 1)
 
     if T is None or T.root is None:
         raise Warning("Empty Trie or root")
-    return searchR(T.root, element, len(element), 0)
+    return searchNodeR(T.root, element, len(element), 0)
+
+
+def search(T, element):
+    return searchNode(T, element)[0]
+
+
+def delete(T, element):
+    wordFound, lastLetterNode = searchNode(T, element)
+    if not wordFound:
+        return False
+
+    lastLetterNode.isEndOfWord = False
+
+    # A word can be a leaf nor an inner node
+    if lastLetterNode.children is []:  # is inner, job done
+        return False
+
+    node = lastLetterNode  # is leaf
+    while True:
+        if node is None or node.isEndOfWord:  # reached the root or a new word ending
+            return True
+        nodeParent = node.parent
+        nodeParent.children.remove(node)
+        node = nodeParent
