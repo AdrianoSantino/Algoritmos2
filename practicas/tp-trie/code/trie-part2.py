@@ -8,21 +8,22 @@ def withPrefix(T: Trie, prefix: str, size: int):
 
     def _withPrefix(node, size, finalList, remaining):
         if size == 0 and node.isEndOfWord:
-            finalList.append(remaining + node.key)
+            finalList.append(remaining)
 
         for child in node.children:
-            _withPrefix(child, size - 1, finalList, remaining + node.key)
+            _withPrefix(child, size - 1, finalList, remaining + child.key)
         return finalList
 
     remainingSize = size - len(prefix)
-    return _withPrefix(lastLetterNode, remainingSize, [], prefix[:-1])
+    return _withPrefix(lastLetterNode, remainingSize, [], prefix)
 
 
 def test():
     T = Trie()
-    for palabra in ["casa", "cosa", "coso", "cortina", "corazon", "corazones", "coraje", "coro", "cero", "cera"]:
+    for palabra in ["hola", "casa", "cosa", "coso", "cortina", "corazon", "corazones", "coraje", "coro", "cero",
+                    "cera"]:
         insert(T, palabra)
-    print(withPrefix(T, "cor", 7))
+    print(withPrefix(T, "", 4))
 
 
 test()
