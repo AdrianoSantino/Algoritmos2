@@ -21,13 +21,15 @@ def withPrefix(T: Trie, prefix: str, size: int) -> list:
 
 
 def sameDocument(T1: Trie, T2: Trie) -> bool:
-    """Tells if T1 and T2 have all same words, iow, they are the same Trie."""
+    """Tells if T1 and T2 have all same words, iow, they are the same Trie.
+    El costo es de O(m*n*log(n)), donde m es el número total de nodos y n es el número de hijos por cada nodo m.
+    El costo n*log(n) se debe a que cada llamada aplica dos ordenamientos de listas."""
 
     def sortByAttribute(node):
         return node.key
 
     def sameDocumentR(node1, node2):
-        if len(node1.children) != len(  # here are all the logical cases where a doc is considered != from other
+        if len(node1.children) != len(  # here are all the logical cases where a doc-node is considered != from another
                 node2.children) or node1.key != node2.key or node1.isEndOfWord != node2.isEndOfWord:
             return False
         keySorted1 = sorted(node1.children, key=sortByAttribute)
