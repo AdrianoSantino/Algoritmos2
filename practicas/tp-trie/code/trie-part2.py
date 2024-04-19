@@ -12,7 +12,7 @@ def withPrefix(T: Trie, prefix: str, size: int) -> list:
             withPrefixR(child, size - 1, finalList, remaining + child.key)  # decrease remaining while adding key
         return finalList  # return when loop finishes (all possible situations where verified)
 
-    wordFound, lastLetterNode = searchNode(T, prefix)
+    wordFound, lastLetterNode = searchWordLastLetterNode(T, prefix)
     if not wordFound or size <= 0 or size <= len(prefix):
         return []  # prefix not found or input errors
 
