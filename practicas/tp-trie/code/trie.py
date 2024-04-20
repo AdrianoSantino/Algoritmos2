@@ -71,3 +71,28 @@ def delete(T, element):
         nodeParent = node.parent
         nodeParent.children.remove(node)
         node = nodeParent
+
+
+def autoCompletar(T, prefijo):
+    """Devuelve la parte restante de una raíz de 2 o + palabras que tengan a -prefijo- como parte de su raíz."""
+    cadenaEncontrada, nodoUltimaLetra = searchWordLastLetterNode(T, prefijo)
+    if not cadenaEncontrada:
+        return ''
+    resto = ''
+    while True:
+        if len(nodoUltimaLetra.children) > 1:
+            return "''" if not resto else resto
+        nodoSigue = nodoUltimaLetra.children[0]
+        resto += nodoSigue.key
+        nodoUltimaLetra = nodoSigue
+
+
+def test():
+    T = Trie()
+    for pal in ["Groenlandés", "Groenlandia", "madera", "mamá"]:
+        insert(T, pal)
+    print(autoCompletar(T, "Groen"))
+    print(autoCompletar(T, "ma"))
+
+
+test()
