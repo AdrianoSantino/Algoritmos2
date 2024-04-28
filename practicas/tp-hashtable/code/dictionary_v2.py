@@ -1,4 +1,4 @@
-import string
+import random
 
 
 class Node:
@@ -17,6 +17,10 @@ class HashTable:
 
     def _hash(self, key):
         return hash(key) % self.capacity
+
+    # puede usarse solamente key % m o bien ord(key) % m, según sean caracteres numéricos o alfanuméricos
+
+    """Ejercicio 2"""
 
     def insert(self, key, value):
         index = self._hash(key)
@@ -79,6 +83,17 @@ class HashTable:
         index = ord(key.lower()) % self.capacity
         return self.table[index]
 
+    def boolean_search(self, key, value):
+        """O(n): where n is the slot-chained-linked-list length.
+        Returns True if (key, value) exists, oth. False"""
+        index = self._hash(key)
+        current = self.table[index]
+        while current:
+            if current.value == value:
+                return True
+            current = current.next
+        return False
+
     def __len__(self):
         return self.size
 
@@ -99,48 +114,102 @@ class HashTable:
             return False
 
 
-def efficient_len_comparison(string1, string2):
-    """O(n). Compara el len de dos strings de manera eficiente, sin tener que usar el len dos veces"""
-    len1 = len(string1)  # toma arbitrariamente un string de referencia
-    try:
-        if string2[len1 - 1]:  # si el otro string tiene algo en esa última posición, sigue
-            try:
-                if string2[len1]:  # si excede en tamaño, devuelve Falso
-                    return False
-            except:
-                return True  # si no, Verdadero
-    except:
-        return False
+"""Ejercicio 4"""
 
 
 def is_permutation(string1, string2) -> bool:
-    """Peor caso: O(4n) >> O(n)
-    Mejor caso O(n)
+    """Peor caso: O(3n) >> O(n) --- Mejor caso: O(1)
     Siendo n y m las longitudes de las cadenas s1 y s2, respectivamente."""
     dicc1 = HashTable(len(string.ascii_lowercase))
     dicc2 = HashTable(len(string.ascii_lowercase))
 
-    if not efficient_len_comparison(string1, string2):  # O(n)
-        return False  # retorna si son diferentes
-    # continúa si tienen el mismo tamaño, digamos, n
-    # edit: el len en Python es de O(1), ¡acabo de enterarme!
+    if len(string1) != len(string2):  # len is 0(1)
+        return False
 
-    # el diccionario utilizado no influye en tiempo (ideal), ya que a priori se conocía el universo dominio
+    # el diccionario utilizado no influye en tiempo (es uno ideal), ya que a priori se conocía el universo dominio
     for letter1 in string1:  # se insertan todas las keys en un diccionario O(n)
         dicc1.insert_count(letter1)
     for letter2 in string2:  # se insertan todas las keys en otro diccionario O(n)
         dicc2.insert_count(letter2)
 
-    for letter1 in string1:
+    for letter1 in string1:  # O(n)
         if dicc1.search_count(letter1) != dicc2.search_count(letter1):  # both dicc counts should be the same
             return False
     return True
 
 
+"""Ejercicio 5
+El ejercicio está prácticamente resuelto mediante las operaciones que se han implementado en este módulo. 
+La función insert utiliza el método de encadenamiento, por lo tanto, si dos keys resultasen tener el mismo slot, el nodo
+ a insertar se coloca en la cabeza de la lista anteriormente creada en el slot, caso contrario, será su único 1er nodo.
+Aquí también los nodos tienen un campo key y un campo value. Cuando hagamos una búsqueda y nos encontremos con un slot 
+que posee una lista, debemos verificar si elemento a insertar está presente, y devolver Falso en ese caso.
+
+Mejor Caso - Si nuestra función hash es ideal y m es lo suficientemente grande
+    inserción y búsqueda: O(1), se aprovecha la función al máximo y nunca hay problema de espacio, búsqueda directa
+Peor Caso - Si tenemos un número considerable de colisiones y el tiempo de barrido influye:
+    inserción y búsqueda: O(n), lo que se asemejaría a un array
+Promedio -> NUESTRO CASO: ya que pueden cierta cantidad colisiones, de elementos diferentes, pero colisiones al fin
+    inserción y búsqueda: O(n/m), lo que se asemejaría a una mezcla de array y hash ideal
+"""
+
+
+def unique_elements(lst):
+    """Promedio de O(n/m): donde n es el len(lst) y m -arbitrario- es len(tabla)."""
+    dicc = HashTable(random.randint(1, len(lst) ** 2))  # tomo un tamaño arbitrario
+    for ele in lst:
+        if dicc.boolean_search(ele, ele):
+            return False
+        dicc.insert(ele, ele)
+    return True
+
+
+"""Ejercicio 6
+Referencias:
+    https://es.wikipedia.org/wiki/ISO_3166-2:AR (1)
+    https://www.escribaniavildosola.com.ar/codigos-postales-argentina.html  (2)
+Criterio:
+Haré 3 hashes anidadas: una para la 1er letra, otra para los 4 dígitos, y una 3ra para los últimos 3 chars
+Para la 1era tomé (1) como referencia, 24 espacios únicos
+Para la 2da calculé la cantidad de códigos postales por provincia en base a (2)
+Para la 3era, la de las las manzanas, tomé todas las posibilidades: 26**3"""
+
+"""Este es mi intento"""
+# def argentina_postal_codes():
+#     file_path = "/home/admin1/Documents/Algoritmos2/practicas/tp-hashtable/code/ex6_data.csv"
+#     with open(file_path, "r") as file:
+#         reader = csv.reader(file, delimiter=',')
+#         province_count = sum(1 for _ in reader)
+#         file.seek(0)  # reset the pointer
+#         province_hash = HashTable(province_count)
+#
+#         for row in reader:
+#             province_code, postal_count = row[0], int(row[2])
+#             postal_hash = HashTable(postal_count)
+#             # Generate all possible 3-character combinations
+#             addresses = [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]
+#             for address in addresses:
+#                 address_hash = HashTable(26 ** 3)
+#                 postal_hash.insert(address, address_hash)
+#             province_hash.insert(province_code, postal_hash)
+#     return province_hash
+
+
+"""Formato más sencillo, para usar una sola tabla"""
+
+
+def argentina_postal_codes_hash(code):
+    return sum(ord(c) for c in code)
+
+
 # Driver code
 if __name__ == '__main__':
-    print(is_permutation("hola", "ahol"))
-    print(is_permutation("hola", "ahodl"))
+    pass
+    # print(argentina_postal_codes_hash("Z1636FDA"))
+    # print(unique_elements([1, 5, 12, 9, 2]))
+    # print(unique_elements([1, 5, 12, 2, 2]))
+    # print(is_permutation("hola", "ahol"))
+    # print(is_permutation("hola", "ahodl"))
     # # Create a hash table with
     # # a capacity of 5
     # ht = HashTable(5)
