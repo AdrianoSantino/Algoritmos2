@@ -1,34 +1,68 @@
-from math import floor, sqrt
+def dictionary(m):
+    return [None] * m
 
 
-def dictionary(size):
-    return [None] * size
-
-
-def hashf_division_method(key, D):
-    return key % len(D)
-
-
-def hashf_multiplication_method(key, D):
-    A = (sqrt(5) - 1) / 2
-    return floor(len(D) * ((key * A) % 1))
+def hashf(k, m):
+    if type(k) is str and len(k) == 1:
+        return ord(k) % m
+    if type(k) is int:
+        return k % m
+    raise TypeError("hashf error.")
 
 
 def insert(D, key, value):
-    index = hashf_division_method(key, D)
-    if not D[index]:
-        D[index] = []
-    D[index].append(value)
-    return index
+    index = hashf(key, len(D))
+    lst = D[index]
+
+    if not lst:
+        D[index] = [(key, value)]
+        return D
+
+    for i, (k, v) in enumerate(lst):
+        if k == key:  # if pair it was already on list, updates
+            lst[i].value = (key, value)
+            return D
+    lst.append((key, value))  # else, adds it
+    return D
 
 
 def search(D, key):
-    index = hashf_division_method(key, D)
-    return key if D[index] else None
+    index = hashf(key, len(D))
+    lst = D[index]
+
+    if not lst:
+        return None
+
+    for i, (k, v) in enumerate(lst):
+        if k == key:
+            return v
+
+    return None  # not found on that index
 
 
 def delete(D, key):
-    index = hashf_division_method(key, D)
-    if D[index]:
-        D[index] = None  # deletes the complete slot
+    index = hashf(key, len(D))
+    lst = D[index]
+
+    if not lst:
+        return D
+
+    for i, (k, v) in enumerate(lst):
+        if k == key:
+            lst.pop(i)
+            if len(lst) == 0:
+                D[index] = None
+            break
+
     return D
+
+
+if __name__ == "__main__":
+    dicc = dictionary(5)
+    insert(dicc, "A", 20)
+    insert(dicc, 20, "G")
+    print(dicc)
+    print(search(dicc, 20))
+    print(search(dicc, "Q"))
+    delete(dicc, 20)
+    print(dicc)

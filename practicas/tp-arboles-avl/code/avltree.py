@@ -348,7 +348,7 @@ def heightAVL(AVL):
     return heightAVLR(AVL.root) - 1 if AVL.root else 0
 
 
-def test():
+if __name__ == "__main__":
     random.seed(9)
     A = AVLTree()
     for key in range(7):
@@ -357,6 +357,3 @@ def test():
     A.root = delete(A, A.root.rightnode.leftnode.key)  # after this deletion, AVL becomes highly unbalanced
     A.root.display()
     print(heightAVL(A))
-
-
-test()

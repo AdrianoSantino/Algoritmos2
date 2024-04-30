@@ -87,12 +87,9 @@ def autoCompletar(T, prefijo):
         nodoUltimaLetra = nodoSigue
 
 
-def test():
+if __name__ == "__main__":
     T = Trie()
     for pal in ["Groenlandés", "Groenlandia", "madera", "mamá"]:
         insert(T, pal)
     print(autoCompletar(T, "Groen"))
     print(autoCompletar(T, "ma"))
-
-
-test()

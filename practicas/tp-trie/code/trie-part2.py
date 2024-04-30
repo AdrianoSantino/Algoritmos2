@@ -56,11 +56,8 @@ def hasReversedStrings(T):
     return False
 
 
-def test():
+if __name__ == "__main__":
     T = Trie()
     for palabra in ["dsa", "asd"]:
         insert(T, palabra)
     print(hasReversedStrings(T))
-
-
-test()

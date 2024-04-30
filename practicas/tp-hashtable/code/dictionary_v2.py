@@ -1,4 +1,5 @@
 import random
+import string
 
 
 class Node:
@@ -200,6 +201,10 @@ Para la 3era, la de las las manzanas, tomé todas las posibilidades: 26**3"""
 
 def argentina_postal_codes_hash(code):
     return sum(ord(c) for c in code)
+
+
+"""Un compañero me transmitió una posible idea para implementar este ejercicio: usar una hash ponderada."""
+
 
 
 # Driver code
