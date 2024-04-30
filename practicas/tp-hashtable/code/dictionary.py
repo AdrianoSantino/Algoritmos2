@@ -1,4 +1,4 @@
-def dictionary(m):
+def create(m):
     return [None] * m
 
 
@@ -20,7 +20,7 @@ def insert(D, key, value):
 
     for i, (k, v) in enumerate(lst):
         if k == key:  # if pair it was already on list, updates
-            lst[i].value = (key, value)
+            lst[i] = (key, value)
             return D
     lst.append((key, value))  # else, adds it
     return D
@@ -58,7 +58,7 @@ def delete(D, key):
 
 
 if __name__ == "__main__":
-    dicc = dictionary(5)
+    dicc = create(5)
     insert(dicc, "A", 20)
     insert(dicc, 20, "G")
     print(dicc)
