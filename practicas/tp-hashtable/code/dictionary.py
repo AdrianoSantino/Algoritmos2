@@ -3,8 +3,8 @@ def create(m):
 
 
 def hashf(k, m):
-    if type(k) is str and len(k) == 1:
-        return ord(k) % m
+    if type(k) is str:
+        return sum(ord(c) for c in k) % m
     if type(k) is int:
         return k % m
     raise TypeError("hashf error.")
