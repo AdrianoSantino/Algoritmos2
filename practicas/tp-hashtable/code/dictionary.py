@@ -57,6 +57,15 @@ def delete(D, key):
     return D
 
 
+def print_hash(D):
+    print("\n==========> HASH")
+    for index in range(len(D)):
+        slot = D[index]
+        print(slot)
+    print("")
+    return
+
+
 if __name__ == "__main__":
     dicc = create(5)
     insert(dicc, "A", 20)
@@ -66,3 +75,9 @@ if __name__ == "__main__":
     print(search(dicc, "Q"))
     delete(dicc, 20)
     print(dicc)
+
+    # ejercicio1
+    D = create(9)
+    for e in [5, 28, 19, 15, 20, 33, 12, 17, 10]:
+        insert(D, e, "hola")
+    print_hash(D)
