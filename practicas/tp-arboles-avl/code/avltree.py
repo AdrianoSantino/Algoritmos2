@@ -84,18 +84,14 @@ class AVLNode:
         return lines, n + m + u, max(p, q) + 2, n + u // 2
 
 
-def newNode(key, val=None):
-    """Creates an AVLNode by specifying key and op. value"""
-    if val is None:
-        val = key
+def newNode(key, val):
     new = AVLNode()
-    new.key = key
-    new.value = val
+    new.key, new.value = key, val
     return new
 
 
 def access(AVL, key) -> AVLNode:
-    """Accesses an AVLNode by key and returns it - O(log(n))"""
+    """Accesses an AVLNode by key - O(log(n))"""
 
     def accessR(node, key):
         if node is None:
@@ -105,14 +101,14 @@ def access(AVL, key) -> AVLNode:
             return accessR(node.leftnode, key)
         elif key > node.key:
             return accessR(node.rightnode, key)
-        else:
+        else:  # found
             return node
 
     return accessR(AVL.root, key)
 
 
-def insert(AVL, key, val=None):
-    """Inserts an AVLNode using the divide and conquer method, returns the current root"""
+def insert(AVL, key, val):
+    """Inserts an AVLNode and returns the current root"""
 
     def insertR(new, node):
         if node is None:
@@ -137,7 +133,7 @@ def delete(AVL, key):
         if node is None:
             return None
         if node.key == key:
-            if node.leftnode is None and node.rightnode is None:  # the node is a leaf
+            if node.leftnode is None and node.rightnode is None:  # the node is a leave
                 return None
             elif node.leftnode is not None and node.rightnode is None:  # only has left child
                 return node.leftnode
