@@ -16,10 +16,10 @@ def newNode(key):
     return new
 
 
-def isLetterOnChildren(node: TrieNode, letter: str) -> [bool, TrieNode | None]:
-    """Returns a tuple: bool is found and the node itself (None if not found)."""
+def isLetterOnChildren(node, char) -> [bool, TrieNode | None]:
+    """Given a letter, returns (True and node) oth (False, None)"""
     for n in node.children:
-        if n.key == letter:
+        if n.key == char:
             return True, n
     return False, None
 
@@ -40,7 +40,7 @@ def insert(T, element):
 
 
 def searchWordLastLetterNode(T, element) -> [bool, TrieNode | None]:
-    """Given a word, returns True if it is on the Trie and the last letter node, otw False and None"""
+    """Given a word, returns (True and LastLetterNode) oth (False, None)"""
     if T is None or T.root is None or not element:
         raise Warning("Empty Trie, root or word")
     node = T.root
@@ -62,14 +62,17 @@ def delete(T, element):
     lastLetterNode.isEndOfWord = False
 
     # A word can be a leaf nor an inner node
-    if lastLetterNode.children is []:  # is inner, job done
-        return False
-    node = lastLetterNode  # is leaf
+    if len(lastLetterNode.children) > 0:  # is inner, job done
+        return True
+
+    node = lastLetterNode
     while True:
-        if node is None or node.isEndOfWord:  # reached the root or a new word ending
+        if node is None or node.isEndOfWord:
             return True
         nodeParent = node.parent
         nodeParent.children.remove(node)
+        if len(nodeParent.children) > 0:
+            return True
         node = nodeParent
 
 
@@ -80,7 +83,7 @@ def autoCompletar(T, prefijo):
         return ''
     resto = ''
     while True:
-        if len(nodoUltimaLetra.children) > 1:
+        if len(nodoUltimaLetra.children) != 1:
             return "''" if not resto else resto
         nodoSigue = nodoUltimaLetra.children[0]
         resto += nodoSigue.key
@@ -92,4 +95,6 @@ if __name__ == "__main__":
     for pal in ["Groenlandés", "Groenlandia", "madera", "mamá"]:
         insert(T, pal)
     print(autoCompletar(T, "Groen"))
+    print(autoCompletar(T, "ma"))
+    delete(T, "mamá")
     print(autoCompletar(T, "ma"))

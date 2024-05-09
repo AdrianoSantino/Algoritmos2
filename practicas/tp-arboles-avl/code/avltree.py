@@ -182,14 +182,17 @@ def traverseIn(AVL) -> list:
     return traverseInR(AVL.root, [AVL.root])
 
 
-def traverseBreadth(AVL):
-    """Returns a list of nodes after traverseBreadth - 0(n): all nodes need to be reached"""
+def traverse(AVL, breadth_notDepth):
+    """Returns a list of nodes after traversing 0(n): all nodes need to be reached"""
 
-    def traverseBreadthR(Q, current):
+    def traverseR(Q, current):
         L = []
         Q.append(current)
         while len(Q) > 0:
-            current = Q.pop(0)
+            if breadth_notDepth is True:
+                current = Q.pop(0)  # BFS uses a queue
+            else:
+                current = Q.pop(len(Q) - 1)  # DFS uses a stack
             L.append(current)
             if current.leftnode:
                 Q.append(current.leftnode)
@@ -198,7 +201,7 @@ def traverseBreadth(AVL):
         return L
 
     if AVL.root is not None:
-        return traverseBreadthR([], AVL.root)
+        return traverseR([], AVL.root)
     return None
 
 
@@ -277,7 +280,7 @@ def calculateBalance(AVL):
 
 
 def find_low_unb(AVL) -> AVLNode | None:
-    trv_bre = traverseBreadth(AVL)
+    trv_bre = traverse(AVL, True)
     trv_bre.reverse()
     for node in trv_bre:
         if abs(node.bf) > 1:
@@ -344,12 +347,21 @@ def heightAVL(AVL):
     return heightAVLR(AVL.root) - 1 if AVL.root else 0
 
 
+def print_nodes_lst(lst):
+    for n in lst:
+        print(n.key, end=' ')
+    print()
+
+
 if __name__ == "__main__":
     random.seed(9)
     A = AVLTree()
     for key in range(7):
-        A.root = insert(A, random.randint(0, 50))
+        n = random.randint(0, 50)
+        A.root = insert(A, n, n)
     A.root.display()
     A.root = delete(A, A.root.rightnode.leftnode.key)  # after this deletion, AVL becomes highly unbalanced
     A.root.display()
+    print_nodes_lst(traverse(A, True))
+    print_nodes_lst(traverse(A, False))
     print(heightAVL(A))

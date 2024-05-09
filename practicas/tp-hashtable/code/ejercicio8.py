@@ -10,7 +10,7 @@ def insert_once_first(D, key, value):
         return D
 
     for i, (k, v) in enumerate(lst):
-        if k == key:  # EDIT from original: if pair it was already on list, returns, we just want 1st time appeared
+        if k == key:  # EDIT from original: if pair was already on list, returns, we just want 1st time appeared
             return D
     lst.append((key, value))  # else, adds it
     return D
